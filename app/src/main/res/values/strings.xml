@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Cricket Scorer</string>
+
+    <string name="title_teams">Teams</string>
+    <string name="title_team_detail">Team</string>
+    <string name="title_match_setup">New Match</string>
+    <string name="title_scoring">Scoring</string>
+    <string name="title_scorecard">Scorecard</string>
+    <string name="title_saved_matches">Saved Matches</string>
+    <string name="title_self_test">Engine Self-Test</string>
+
+    <string name="home_subtitle">Offline cricket scoring powered by a C++ engine</string>
+    <string name="home_manage_teams">Manage Teams</string>
+    <string name="home_new_match">New Match</string>
+    <string name="home_saved_matches">Saved Matches</string>
+    <string name="home_self_test">Run Engine Self-Test</string>
+
+    <string name="add_team">Add team</string>
+    <string name="add_player">Add player</string>
+    <string name="team_name">Team name</string>
+    <string name="player_name">Player name</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="start_match">Start match</string>
+
+    <string name="choose_team_a">Team A</string>
+    <string name="choose_team_b">Team B</string>
+    <string name="toss_winner">Toss winner</string>
+    <string name="toss_choice">Won the toss and will</string>
+    <string name="bat_first">Bat first</string>
+    <string name="bowl_first">Bowl first</string>
+    <string name="striker">Striker</string>
+    <string name="non_striker">Non-striker</string>
+    <string name="opening_bowler">Opening bowler</string>
+    <string name="date">Date</string>
+    <string name="venue">Venue</string>
+    <string name="overs">Overs</string>
+
+    <string name="no_matches">No saved matches yet.</string>
+    <string name="no_teams">No teams yet. Tap “Add team”.</string>
+</resources>

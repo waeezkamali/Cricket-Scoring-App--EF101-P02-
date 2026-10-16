@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="brand_primary">#0B6E4F</color>
+    <color name="brand_primary_dark">#075539</color>
+    <color name="brand_secondary">#F2A900</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="surface_dark">#121212</color>
+    <color name="on_surface">#1C1B1F</color>
+    <color name="on_surface_dark">#E6E1E5</color>
+    <color name="danger">#B3261E</color>
+    <color name="success">#2E7D32</color>
+    <color name="warning">#E65100</color>
+    <color name="chip_bg">#E8F5E9</color>
+</resources>

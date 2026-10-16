@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- The application is fully offline. No network permission is requested. -->
+
+    <application
+        android:name=".CricketApp"
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@drawable/ic_launcher"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.CricketScorer"
+        tools:targetApi="31">
+
+        <activity
+            android:name=".ui.MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".ui.TeamsActivity"
+            android:exported="false"
+            android:label="@string/title_teams" />
+
+        <activity
+            android:name=".ui.TeamDetailActivity"
+            android:exported="false"
+            android:label="@string/title_team_detail" />
+
+        <activity
+            android:name=".ui.MatchSetupActivity"
+            android:exported="false"
+            android:label="@string/title_match_setup" />
+
+        <activity
+            android:name=".ui.ScoringActivity"
+            android:exported="false"
+            android:label="@string/title_scoring" />
+
+        <activity
+            android:name=".ui.ScorecardActivity"
+            android:exported="false"
+            android:label="@string/title_scorecard" />
+
+        <activity
+            android:name=".ui.SavedMatchesActivity"
+            android:exported="false"
+            android:label="@string/title_saved_matches" />
+
+        <activity
+            android:name=".ui.SelfTestActivity"
+            android:exported="false"
+            android:label="@string/title_self_test" />
+
+    </application>
+
+</manifest>
