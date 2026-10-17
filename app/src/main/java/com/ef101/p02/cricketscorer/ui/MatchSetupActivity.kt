@@ -19,6 +19,14 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/**
+ * Match setup screen.
+ *
+ * The striker / non-striker spinners are mutually exclusive: a player chosen in
+ * one role is removed from the other's list, so the same person can never be
+ * selected to occupy both ends. The opening-bowler spinner is always populated
+ * from the *opposing* (bowling) team's roster.
+ */
 class MatchSetupActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMatchSetupBinding
@@ -31,8 +39,15 @@ class MatchSetupActivity : AppCompatActivity() {
     private var teamB: Team? = null
     private var battingFirst: Team? = null
     private var bowlingTeam: Team? = null
+
     private var battingPlayers: List<Player> = emptyList()
     private var bowlingPlayers: List<Player> = emptyList()
+
+    // The lists actually backing the two crease spinners. They are kept free of
+    // the player chosen in the opposite role.
+    private var strikerOptions: List<Player> = emptyList()
+    private var nonStrikerOptions: List<Player> = emptyList()
+    private var bowlerOptions: List<Player> = emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,9 +67,10 @@ class MatchSetupActivity : AppCompatActivity() {
 
         bindSpinner(binding.teamASpinner, teams.map { it.name })
         bindSpinner(binding.teamBSpinner, teams.map { it.name })
-        bindSpinner(binding.tossChoiceSpinner, listOf(
-            getString(R.string.bat_first), getString(R.string.bowl_first)
-        ))
+        bindSpinner(
+            binding.tossChoiceSpinner,
+            listOf(getString(R.string.bat_first), getString(R.string.bowl_first))
+        )
         bindSpinner(binding.tossWinnerSpinner, emptyList())
         bindSpinner(binding.strikerSpinner, emptyList())
         bindSpinner(binding.nonStrikerSpinner, emptyList())
@@ -62,21 +78,32 @@ class MatchSetupActivity : AppCompatActivity() {
 
         if (teams.size >= 2) binding.teamBSpinner.setSelection(1)
 
-        val listener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(p: AdapterView<*>?, v: View?, pos: Int, id: Long) {
-                rebuildOpeners()
-            }
-            override fun onNothingSelected(p: AdapterView<*>?) { rebuildOpeners() }
+        val teamListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(p: AdapterView<*>?, v: View?, pos: Int, id: Long) =
+                rebuildTeamContext()
+
+            override fun onNothingSelected(p: AdapterView<*>?) = rebuildTeamContext()
         }
-        binding.teamASpinner.onItemSelectedListener = listener
-        binding.teamBSpinner.onItemSelectedListener = listener
-        binding.tossChoiceSpinner.onItemSelectedListener = listener
-        binding.tossWinnerSpinner.onItemSelectedListener = listener
+        binding.teamASpinner.onItemSelectedListener = teamListener
+        binding.teamBSpinner.onItemSelectedListener = teamListener
+        binding.tossChoiceSpinner.onItemSelectedListener = teamListener
+        binding.tossWinnerSpinner.onItemSelectedListener = teamListener
+
+        val creaseListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(p: AdapterView<*>?, v: View?, pos: Int, id: Long) =
+                refreshCreaseOptions()
+
+            override fun onNothingSelected(p: AdapterView<*>?) = refreshCreaseOptions()
+        }
+        binding.strikerSpinner.onItemSelectedListener = creaseListener
+        binding.nonStrikerSpinner.onItemSelectedListener = creaseListener
 
         binding.btnStart.setOnClickListener { startMatch() }
 
-        rebuildOpeners()
+        rebuildTeamContext()
     }
+
+    // ----- Spinner plumbing -------------------------------------------------
 
     private fun bindSpinner(spinner: Spinner, values: List<String>) {
         val adapter = ArrayAdapter(
@@ -96,16 +123,38 @@ class MatchSetupActivity : AppCompatActivity() {
         if (current in values.indices) spinner.setSelection(current)
     }
 
-    private fun rebuildOpeners() {
+    /** Replaces a spinner's items with [players], keeping [preferredId] selected. */
+    private fun setPlayerSpinner(spinner: Spinner, players: List<Player>, preferredId: Int?) {
+        @Suppress("UNCHECKED_CAST")
+        val adapter = spinner.adapter as ArrayAdapter<String>
+        adapter.clear()
+        adapter.addAll(players.map { it.name })
+        adapter.notifyDataSetChanged()
+        val idx = players.indexOfFirst { it.id == preferredId }
+        if (idx >= 0) {
+            spinner.setSelection(idx)
+        } else if (players.isNotEmpty()) {
+            spinner.setSelection(0)
+        }
+    }
+
+    private fun selectedPlayer(spinner: Spinner, options: List<Player>): Player? =
+        options.getOrNull(spinner.selectedItemPosition)
+
+    // ----- Rebuilding -------------------------------------------------------
+
+    /**
+     * Recomputes the batting / bowling teams from the team + toss spinners and
+     * repopulates every dependent spinner. Called whenever teams or the toss
+     * change.
+     */
+    private fun rebuildTeamContext() {
         if (updating) return
         updating = true
         try {
-            val posA = binding.teamASpinner.selectedItemPosition
-            val posB = binding.teamBSpinner.selectedItemPosition
-            teamA = teams.getOrNull(posA)
-            teamB = teams.getOrNull(posB)
+            teamA = teams.getOrNull(binding.teamASpinner.selectedItemPosition)
+            teamB = teams.getOrNull(binding.teamBSpinner.selectedItemPosition)
 
-            // Toss winner list always mirrors the two chosen teams.
             setSpinnerValues(
                 binding.tossWinnerSpinner,
                 listOfNotNull(teamA?.name, teamB?.name).distinct()
@@ -116,68 +165,100 @@ class MatchSetupActivity : AppCompatActivity() {
             val batFirstChoice = binding.tossChoiceSpinner.selectedItemPosition == 0
 
             val tossWinner: Team? = when (tossWinnerName) {
-                teamA?.name -> teamA
                 teamB?.name -> teamB
                 else -> teamA
             }
-            val other: Team? = if (tossWinner === teamA) teamB else teamA
+            val other: Team? = if (tossWinner?.id == teamA?.id) teamB else teamA
 
-            battingFirst = if (batFirstChoice) tossWinner else other
-            bowlingTeam = if (battingFirst === teamA) teamB else teamA
-
-            if (battingFirst == null || bowlingTeam == null ||
-                battingFirst === bowlingTeam
-            ) {
-                binding.battingFirstLabel.text = "Select two different teams"
+            if (teamA == null || teamB == null || teamA!!.id == teamB!!.id) {
+                battingFirst = null
+                bowlingTeam = null
                 battingPlayers = emptyList()
                 bowlingPlayers = emptyList()
+                binding.battingFirstLabel.text = getString(R.string.select_two_teams)
             } else {
-                binding.battingFirstLabel.text =
-                    "${battingFirst!!.name} will bat first"
+                battingFirst = if (batFirstChoice) tossWinner else other
+                // The bowling side is always the "other" team.
+                bowlingTeam = if (battingFirst!!.id == teamA!!.id) teamB else teamA
                 battingPlayers = battingFirst!!.players
                 bowlingPlayers = bowlingTeam!!.players
+                binding.battingFirstLabel.text =
+                    getString(R.string.batting_first_fmt, battingFirst!!.name)
             }
 
-            setSpinnerValues(binding.strikerSpinner, battingPlayers.map { it.name })
-            setSpinnerValues(binding.nonStrikerSpinner, battingPlayers.map { it.name })
-            setSpinnerValues(binding.bowlerSpinner, bowlingPlayers.map { it.name })
+            strikerOptions = battingPlayers
+            nonStrikerOptions = battingPlayers
+            bowlerOptions = bowlingPlayers
+            setPlayerSpinner(binding.strikerSpinner, strikerOptions, null)
+            setPlayerSpinner(binding.nonStrikerSpinner, nonStrikerOptions, null)
+            setPlayerSpinner(binding.bowlerSpinner, bowlerOptions, null)
+        } finally {
+            updating = false
+        }
+        // Immediately apply the mutual-exclusion rule so the striker and
+        // non-striker default to two different players.
+        refreshCreaseOptions()
+    }
+
+    /**
+     * Keeps the striker / non-striker spinners mutually exclusive. The striker
+     * list excludes the chosen non-striker and vice-versa.
+     */
+    private fun refreshCreaseOptions() {
+        if (updating) return
+        updating = true
+        try {
+            val striker = selectedPlayer(binding.strikerSpinner, strikerOptions)
+            val nonStriker = selectedPlayer(binding.nonStrikerSpinner, nonStrikerOptions)
+
+            nonStrikerOptions = battingPlayers.filter { it.id != striker?.id }
+            setPlayerSpinner(binding.nonStrikerSpinner, nonStrikerOptions, nonStriker?.id)
+
+            val chosenNonStriker =
+                selectedPlayer(binding.nonStrikerSpinner, nonStrikerOptions)
+            strikerOptions = battingPlayers.filter { it.id != chosenNonStriker?.id }
+            setPlayerSpinner(binding.strikerSpinner, strikerOptions, striker?.id)
         } finally {
             updating = false
         }
     }
 
+    // ----- Start ------------------------------------------------------------
+
     private fun startMatch() {
+        binding.errorText.visibility = View.GONE
+
         val a = teamA
         val b = teamB
         if (a == null || b == null || a.id == b.id) {
-            showError("Please select two different teams.")
-            return
+            return fail("Please select two different teams.")
         }
         val overs = binding.etOvers.text.toString().toIntOrNull()
         if (overs == null || overs <= 0) {
-            showError("Enter a valid number of overs.")
-            return
+            return fail("Enter a valid number of overs.")
         }
         if (binding.etVenue.text.isNullOrBlank()) {
-            showError("Enter a venue.")
-            return
+            return fail("Enter a venue.")
         }
         if (battingPlayers.size < 2) {
-            showError("The batting team needs at least 2 players.")
-            return
+            return fail("The batting team needs at least 2 players.")
         }
         if (bowlingPlayers.isEmpty()) {
-            showError("The bowling team needs at least 1 player.")
-            return
+            return fail("The bowling team needs at least 1 player.")
         }
 
-        val strikerId = battingPlayers[binding.strikerSpinner.selectedItemPosition].id
-        val nonStrikerId = battingPlayers[binding.nonStrikerSpinner.selectedItemPosition].id
-        if (strikerId == nonStrikerId) {
-            showError("Striker and non-striker must be different players.")
-            return
+        val striker = selectedPlayer(binding.strikerSpinner, strikerOptions)
+        val nonStriker = selectedPlayer(binding.nonStrikerSpinner, nonStrikerOptions)
+        if (striker == null || nonStriker == null) {
+            return fail("Select both the striker and the non-striker.")
         }
-        val bowlerId = bowlingPlayers[binding.bowlerSpinner.selectedItemPosition].id
+        if (striker.id == nonStriker.id) {
+            return fail("Striker and non-striker must be different players.")
+        }
+        val bowler = selectedPlayer(binding.bowlerSpinner, bowlerOptions)
+        if (bowler == null) {
+            return fail("Select the opening bowler.")
+        }
 
         val engine = NativeEngine.create()
         try {
@@ -191,19 +272,16 @@ class MatchSetupActivity : AppCompatActivity() {
             )
             val validation = engine.validationMessage()
             if (validation.isNotEmpty()) {
-                showError(validation)
-                return
+                return fail(validation)
             }
-            if (!engine.startMatch(strikerId, nonStrikerId, bowlerId)) {
-                showError("Could not start the match. Check your selections.")
-                return
+            if (!engine.startMatch(striker.id, nonStriker.id, bowler.id)) {
+                return fail("Could not start the match. Check your selections.")
             }
 
             val matchId = MatchStore.newMatchId()
             val saveError = MatchStore.save(this, engine, matchId)
             if (saveError.isNotEmpty()) {
-                showError(saveError)
-                return
+                return fail(saveError)
             }
 
             startActivity(
@@ -216,7 +294,9 @@ class MatchSetupActivity : AppCompatActivity() {
         }
     }
 
-    private fun showError(message: String) {
+    /** Shows a clean Toast (and inline hint) for an invalid setup. */
+    private fun fail(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
         binding.errorText.text = message
         binding.errorText.visibility = View.VISIBLE
     }

@@ -14,16 +14,19 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.btnNewMatch.setOnClickListener {
+        binding.cardNewMatch.setOnClickListener {
             startActivity(Intent(this, MatchSetupActivity::class.java))
         }
-        binding.btnTeams.setOnClickListener {
+        binding.cardTeams.setOnClickListener {
             startActivity(Intent(this, TeamsActivity::class.java))
         }
-        binding.btnSavedMatches.setOnClickListener {
+        binding.cardSavedMatches.setOnClickListener {
             startActivity(Intent(this, SavedMatchesActivity::class.java))
         }
-        binding.btnSelfTest.setOnClickListener {
+        binding.cardCareerStats.setOnClickListener {
+            startActivity(Intent(this, CareerStatsActivity::class.java))
+        }
+        binding.cardSelfTest.setOnClickListener {
             startActivity(Intent(this, SelfTestActivity::class.java))
         }
     }

@@ -11,4 +11,11 @@
     <color name="success">#2E7D32</color>
     <color name="warning">#E65100</color>
     <color name="chip_bg">#E8F5E9</color>
+
+    <!-- Secondary / muted metrics such as strike rate and economy. -->
+    <color name="text_muted">#667085</color>
+    <color name="text_primary">#101828</color>
+    <color name="table_header_bg">#EAF3EF</color>
+    <color name="table_divider">#E4E7EC</color>
+    <color name="card_surface">#FFFFFF</color>
 </resources>

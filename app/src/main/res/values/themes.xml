@@ -8,6 +8,14 @@
         <item name="colorSecondary">@color/brand_secondary</item>
         <item name="colorOnSecondary">#000000</item>
         <item name="android:statusBarColor" tools:targetApi="l">@color/brand_primary_dark</item>
+        <item name="android:windowAnimationStyle">@style/Cricket.WindowAnimation</item>
+    </style>
+
+    <style name="Cricket.WindowAnimation" parent="@android:style/Animation.Activity">
+        <item name="android:activityOpenEnterAnimation">@anim/slide_in_right</item>
+        <item name="android:activityOpenExitAnimation">@anim/slide_out_left</item>
+        <item name="android:activityCloseEnterAnimation">@anim/slide_in_left</item>
+        <item name="android:activityCloseExitAnimation">@anim/slide_out_right</item>
     </style>
 
     <style name="Widget.Cricket.Button" parent="Widget.Material3.Button">
@@ -16,5 +24,16 @@
 
     <style name="Widget.Cricket.OutlinedButton" parent="Widget.Material3.Button.OutlinedButton">
         <item name="android:minHeight">56dp</item>
+    </style>
+
+    <style name="Widget.Cricket.Card" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardCornerRadius">18dp</item>
+        <item name="cardElevation">2dp</item>
+        <item name="cardBackgroundColor">@color/card_surface</item>
+    </style>
+
+    <style name="TextAppearance.Cricket.SectionTitle" parent="TextAppearance.Material3.TitleMedium">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/brand_primary</item>
     </style>
 </resources>

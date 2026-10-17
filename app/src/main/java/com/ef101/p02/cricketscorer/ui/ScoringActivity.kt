@@ -1,7 +1,9 @@
 package com.ef101.p02.cricketscorer.ui
 
+import android.animation.ValueAnimator
 import android.content.Intent
 import android.os.Bundle
+import android.view.HapticFeedbackConstants
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -25,6 +27,10 @@ class ScoringActivity : AppCompatActivity() {
 
     private var promptInFlight = false
 
+    private var scoreAnimator: ValueAnimator? = null
+    private var displayedRuns = -1
+    private var displayedTeam: String? = null
+
     private data class Person(val id: Int, val name: String)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,21 +52,29 @@ class ScoringActivity : AppCompatActivity() {
     }
 
     private fun wireButtons() {
-        binding.btn0.setOnClickListener { record(0) }
-        binding.btn1.setOnClickListener { record(1) }
-        binding.btn2.setOnClickListener { record(2) }
-        binding.btn3.setOnClickListener { record(3) }
-        binding.btn4.setOnClickListener { record(4) }
-        binding.btn6.setOnClickListener { record(6) }
+        binding.btn0.setOnClickListener { tap(it); record(0) }
+        binding.btn1.setOnClickListener { tap(it); record(1) }
+        binding.btn2.setOnClickListener { tap(it); record(2) }
+        binding.btn3.setOnClickListener { tap(it); record(3) }
+        binding.btn4.setOnClickListener { tap(it); record(4) }
+        binding.btn6.setOnClickListener { tap(it); record(6) }
 
-        binding.btnWide.setOnClickListener { promptWide() }
-        binding.btnNoBall.setOnClickListener { promptNoBall() }
-        binding.btnBye.setOnClickListener { promptBye(false) }
-        binding.btnLegBye.setOnClickListener { promptBye(true) }
-        binding.btnWicket.setOnClickListener { promptWicket() }
+        binding.btnWide.setOnClickListener { tap(it); promptWide() }
+        binding.btnNoBall.setOnClickListener { tap(it); promptNoBall() }
+        binding.btnBye.setOnClickListener { tap(it); promptBye(false) }
+        binding.btnLegBye.setOnClickListener { tap(it); promptBye(true) }
+        binding.btnWicket.setOnClickListener { tap(it, strong = true); promptWicket() }
 
-        binding.btnSecondInnings.setOnClickListener { promptSecondInnings() }
+        binding.btnSecondInnings.setOnClickListener { tap(it); promptSecondInnings() }
         binding.btnViewScorecard.setOnClickListener { openScorecard() }
+    }
+
+    /** Light tactile feedback for scoring buttons. */
+    private fun tap(view: View, strong: Boolean = false) {
+        view.performHapticFeedback(
+            if (strong) HapticFeedbackConstants.LONG_PRESS
+            else HapticFeedbackConstants.VIRTUAL_KEY
+        )
     }
 
     // ----- Recording --------------------------------------------------------
@@ -223,7 +237,7 @@ class ScoringActivity : AppCompatActivity() {
         val complete = state.optBoolean("matchComplete")
         val inningsComplete = state.optBoolean("inningsComplete")
 
-        binding.scoreText.text = "$batting $runs/$wickets"
+        animateScore(batting, runs, wickets)
         binding.oversText.text = "$overs / $totalOvers overs"
 
         if (target > 0 && !complete) {
@@ -273,6 +287,32 @@ class ScoringActivity : AppCompatActivity() {
 
         binding.btnSecondInnings.visibility =
             if (inningsComplete && !complete) View.VISIBLE else View.GONE
+    }
+
+    /** Animates the run counter between deliveries while keeping the team and
+     *  wicket suffix static. */
+    private fun animateScore(batting: String, runs: Int, wickets: Int) {
+        if (batting != displayedTeam) {
+            scoreAnimator?.cancel()
+            displayedTeam = batting
+            displayedRuns = 0
+        }
+        val from = if (displayedRuns < 0) 0 else displayedRuns
+        if (from == runs) {
+            displayedRuns = runs
+            binding.scoreText.text = "$batting $runs/$wickets"
+            return
+        }
+        scoreAnimator?.cancel()
+        displayedRuns = runs
+        scoreAnimator = ValueAnimator.ofInt(from, runs).apply {
+            duration = 420L
+            addUpdateListener {
+                val value = it.animatedValue as Int
+                binding.scoreText.text = "$batting $value/$wickets"
+            }
+            start()
+        }
     }
 
     private fun Person.runsLabel(): String {
@@ -367,12 +407,12 @@ class ScoringActivity : AppCompatActivity() {
             .setItems(strikerLabels) { _, sIdx ->
                 AlertDialog.Builder(this)
                     .setTitle("Select non-striker")
-                    .setItems(strikerLabels) { _, nsIdx ->
+                    .setItems(strikerLabels) nsHandler@{ _, nsIdx ->
                         if (nsIdx == sIdx) {
                             Toast.makeText(this, "Striker and non-striker must differ",
                                 Toast.LENGTH_SHORT).show()
                             promptInFlight = false
-                            return@setItems
+                            return@nsHandler
                         }
                         val bowlerLabels = defending.map { it.name }.toTypedArray()
                         AlertDialog.Builder(this)
@@ -459,6 +499,7 @@ class ScoringActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        scoreAnimator?.cancel()
         if (::engine.isInitialized) engine.close()
     }
 }

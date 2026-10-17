@@ -9,12 +9,43 @@
     <string name="title_scorecard">Scorecard</string>
     <string name="title_saved_matches">Saved Matches</string>
     <string name="title_self_test">Engine Self-Test</string>
+    <string name="title_career_stats">Career Stats</string>
 
     <string name="home_subtitle">Offline cricket scoring powered by a C++ engine</string>
+    <string name="home_header_title">Cricket Scorer</string>
     <string name="home_manage_teams">Manage Teams</string>
     <string name="home_new_match">New Match</string>
     <string name="home_saved_matches">Saved Matches</string>
     <string name="home_self_test">Run Engine Self-Test</string>
+    <string name="home_career_stats">Career Stats</string>
+    <string name="home_new_match_desc">Set up teams, toss and openers</string>
+    <string name="home_teams_desc">Create squads and players</string>
+    <string name="home_saved_desc">Resume or review past matches</string>
+    <string name="home_stats_desc">Aggregate player records</string>
+    <string name="home_self_test_desc">Verify the C++ engine edge cases</string>
+
+    <string name="scorecard_batting">Batting</string>
+    <string name="scorecard_bowling">Bowling</string>
+    <string name="scorecard_extras">Extras</string>
+    <string name="scorecard_total">Total</string>
+    <string name="scorecard_runrate">Runs per over</string>
+    <string name="action_share">Share</string>
+    <string name="share_chooser_title">Share scorecard</string>
+    <string name="share_copied">Scorecard copied to clipboard</string>
+    <string name="career_empty">No saved match data yet. Play and save a match to build player records.</string>
+    <string name="career_batting_headers">Player</string>
+    <string name="career_matches">M</string>
+    <string name="career_runs">Runs</string>
+    <string name="career_avg">Avg</string>
+    <string name="career_sr">SR</string>
+    <string name="career_hs">HS</string>
+    <string name="career_fours">4s</string>
+    <string name="career_sixes">6s</string>
+    <string name="career_wickets">Wkts</string>
+    <string name="career_econ">Econ</string>
+    <string name="career_best">Best</string>
+    <string name="career_tab_batting">Batting</string>
+    <string name="career_tab_bowling">Bowling</string>
 
     <string name="add_team">Add team</string>
     <string name="add_player">Add player</string>
@@ -37,6 +68,8 @@
     <string name="date">Date</string>
     <string name="venue">Venue</string>
     <string name="overs">Overs</string>
+    <string name="select_two_teams">Select two different teams</string>
+    <string name="batting_first_fmt">%1$s will bat first</string>
 
     <string name="no_matches">No saved matches yet.</string>
     <string name="no_teams">No teams yet. Tap “Add team”.</string>

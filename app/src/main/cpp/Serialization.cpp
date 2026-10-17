@@ -248,6 +248,33 @@ std::string CricketEngine::scorecardJson() const {
         os << "\"extras\":" << extrasJson(inn.extrasWides, inn.extrasNoBalls,
                                           inn.extrasByes, inn.extrasLegByes) << ",";
 
+        // Over-by-over run progression used by the scorecard run-rate graph.
+        std::vector<int> perOver;
+        for (const Delivery& d : inn.timeline) {
+            size_t dot = d.overLabel.find('.');
+            int overNo = toInt(dot == std::string::npos ? d.overLabel
+                                                        : d.overLabel.substr(0, dot));
+            if (overNo < 0) overNo = 0;
+            if (static_cast<int>(perOver.size()) <= overNo) {
+                perOver.resize(overNo + 1, 0);
+            }
+            perOver[overNo] += d.totalRuns;
+        }
+        os << "\"perOverRuns\":[";
+        for (size_t k = 0; k < perOver.size(); ++k) {
+            if (k) os << ",";
+            os << perOver[k];
+        }
+        os << "],";
+        os << "\"cumulativeRuns\":[";
+        int acc = 0;
+        for (size_t k = 0; k < perOver.size(); ++k) {
+            acc += perOver[k];
+            if (k) os << ",";
+            os << acc;
+        }
+        os << "],";
+
         os << "\"batters\":[";
         for (size_t b = 0; b < inn.batters.size(); ++b) {
             const BatterInnings& bi = inn.batters[b];

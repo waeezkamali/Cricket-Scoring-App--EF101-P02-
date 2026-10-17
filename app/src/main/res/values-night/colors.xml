@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark-mode overrides for the semantic scorecard palette. -->
+    <color name="text_muted">#9AA4B2</color>
+    <color name="text_primary">#E6E1E5</color>
+    <color name="table_header_bg">#1E2A24</color>
+    <color name="table_divider">#2A2F36</color>
+    <color name="card_surface">#1A1C1E</color>
+</resources>

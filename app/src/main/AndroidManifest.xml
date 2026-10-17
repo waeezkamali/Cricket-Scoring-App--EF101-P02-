@@ -60,6 +60,11 @@
             android:exported="false"
             android:label="@string/title_self_test" />
 
+        <activity
+            android:name=".ui.CareerStatsActivity"
+            android:exported="false"
+            android:label="@string/title_career_stats" />
+
     </application>
 
 </manifest>
