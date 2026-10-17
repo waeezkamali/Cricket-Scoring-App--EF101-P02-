@@ -6,7 +6,7 @@ plugins {
 android {
     namespace = "com.ef101.p02.cricketscorer"
     compileSdk = 34
-    ndkVersion = "26.1.10909125"
+    ndkVersion = "30.0.16248370"
 
     defaultConfig {
         applicationId = "com.ef101.p02.cricketscorer"

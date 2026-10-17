@@ -1,11 +1,16 @@
+# Gradle & IDE
 *.iml
 .gradle/
 /local.properties
 /.idea/
 .DS_Store
+
+# Build Outputs
 /build/
 /app/build/
 /captures/
+
+# Native C++ Build Files
 .externalNativeBuild/
 .cxx/
 /app/src/main/cpp/tests/*.exe
